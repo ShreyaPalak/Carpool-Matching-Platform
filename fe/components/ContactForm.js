@@ -1,0 +1,28 @@
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+
+  const scriptURL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbyrzpX3_Oe8PcmJZXodqbjNRzVa7nYSXw9Wh6LUBuwnpO_xbTE5STeFAKESGT8OEag1Nw/exec';
+
+  try {
+    const form = new FormData();
+    for (const key in formData) {
+      form.append(key, formData[key]);
+    }
+
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      body: form,
+    });
+
+    if (!response.ok) throw new Error('Google Sheets request failed');
+    alert('Thanks for contacting us! We will get back to you soon.');
+    router.push('/confirmation');
+  } catch (error) {
+    console.error('Error:', error.message);
+    alert('Failed to submit ride request');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
