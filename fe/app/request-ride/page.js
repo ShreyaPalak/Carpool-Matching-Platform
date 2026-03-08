@@ -245,7 +245,6 @@ export default function RequestRidePage() {
                 className={`w-full py-3 px-4 text-lg font-medium text-white bg-gradient-to-r from-peach-500 to-peach-600 rounded-md shadow-sm hover:from-peach-600 hover:to-peach-700 transition-all duration-200 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Processing...' : 'Submit Ride Request'}
-                router.push('/confirmation');
               </button>
             </div>
           </form>

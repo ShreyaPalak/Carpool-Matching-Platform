@@ -1,20 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  FaCheckCircle, 
-  FaCar, 
-  FaMapMarkerAlt, 
-  FaClock, 
-  FaUserAlt, 
-  FaPhone, 
-  FaStar, 
-  FaSuitcase, 
-  FaPaw, 
-  FaWheelchair 
-} from 'react-icons/fa';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { FaCheckCircle } from 'react-icons/fa';
 
 export default function RideConfirmation() {
   const router = useRouter();
