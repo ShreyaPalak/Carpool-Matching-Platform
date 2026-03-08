@@ -1,0 +1,150 @@
+diff a/fe/app/confirmation/page.js b/fe/app/confirmation/page.js	(rejected hunks)
+@@ -1,74 +1,96 @@
+-'use client';
+-import { useEffect, useState } from 'react';
+-import { useRouter } from 'next/navigation';
+-import { 
+-  FaCheckCircle, 
+-  FaCar, 
+-  FaMapMarkerAlt, 
+-  FaClock, 
+-  FaUserAlt, 
+-  FaPhone, 
+-  FaStar, 
+-  FaSuitcase, 
+-  FaPaw, 
+-  FaWheelchair 
+-} from 'react-icons/fa';
+-import { Button } from "@/components/ui/button";
+-import { Card, CardContent } from "@/components/ui/card";
++"use client";
++
++import { useEffect, useState } from "react";
++import { useRouter } from "next/navigation";
++import { FaCheckCircle, FaClock, FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
+ 
+ export default function RideConfirmation() {
+   const router = useRouter();
+   const [isLoading, setIsLoading] = useState(true);
+   const [rideDetails, setRideDetails] = useState(null);
+ 
+   useEffect(() => {
+-    // Only run on client side
+-    if (typeof window !== 'undefined') {
+-      const storedDetails = localStorage.getItem('rideDetails');
+-      if (storedDetails) {
+-        setRideDetails(JSON.parse(storedDetails));
+-      }
+-      setIsLoading(false);
++    const storedDetails = localStorage.getItem("rideDetails");
++    if (storedDetails) {
++      setRideDetails(JSON.parse(storedDetails));
+     }
++    setIsLoading(false);
++  }, []);
+ 
+-    const timer = setTimeout(() => {
+-      router.push('/');
+-    }, 30000);
+-    
++  useEffect(() => {
++    if (!rideDetails) return;
++    const timer = setTimeout(() => router.push("/"), 20000);
+     return () => clearTimeout(timer);
+-  }, [router]);
++  }, [rideDetails, router]);
++
++  if (isLoading) {
++    return (
++      <div className="flex min-h-screen items-center justify-center bg-[#050505] text-cyan-300">
++        Loading confirmation...
++      </div>
++    );
++  }
+ 
+-  if (isLoading || !rideDetails) {
++  if (!rideDetails) {
+     return (
+-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+-        <div className="text-blue-800">Loading ride details...</div>
++      <div className="flex min-h-screen flex-col items-center justify-center bg-[#050505] px-4 text-center text-slate-200">
++        <p className="text-xl font-semibold">No ride details found.</p>
++        <button
++          onClick={() => router.push("/request-ride")}
++          className="mt-4 rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-[#050505]"
++        >
++          Request a new ride
++        </button>
+       </div>
+     );
+   }
+ 
+   return (
+-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+-      {/* Rest of your confirmation UI */}
+-      <div className="max-w-lg mx-auto">
+-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center">
+-            <FaCheckCircle className="mx-auto text-5xl text-white mb-4" />
+-            <h1 className="text-2xl font-bold text-white">Ride Confirmed!</h1>
+-            <p className="text-white/90 mt-2">Your {rideDetails.rideType} ride is booked</p>
+-          </div>
++    <div className="min-h-screen bg-[#050505] px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
++      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_25%_10%,rgba(0,242,255,0.18),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(112,0,255,0.18),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(0,242,255,0.1),transparent_35%)]" />
+ 
+-          {/* Display all ride details here */}
+-          <div className="p-6">
+-            <h2 className="text-xl font-semibold mb-4">Ride Summary</h2>
+-            <div className="space-y-3">
+-              <p><strong>Pickup:</strong> {rideDetails.pickup}</p>
+-              <p><strong>Destination:</strong> {rideDetails.destination}</p>
+-              <p><strong>Time:</strong> {rideDetails.departureTime}</p>
+-              {/* Add other details as needed */}
+-            </div>
++      <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
++        <div className="text-center">
++          <FaCheckCircle className="mx-auto text-6xl text-cyan-300" />
++          <p className="mt-3 text-xs uppercase tracking-[0.2em] text-cyan-300">Booking Confirmed</p>
++          <h1 className="mt-2 text-3xl font-semibold">Your Ride Is Locked In</h1>
++          <p className="mt-2 text-sm text-slate-300">Cyber-Noir dispatch matched your request successfully.</p>
++        </div>
++
++        <div className="mt-8 grid gap-4 sm:grid-cols-2">
++          <div className="rounded-2xl border border-cyan-300/20 bg-black/25 p-4">
++            <p className="text-xs uppercase text-slate-400">Booking ID</p>
++            <p className="mt-1 flex items-center gap-2 text-lg font-semibold text-cyan-200"><FaTicketAlt /> {rideDetails.bookingId || "RF-NA"}</p>
++          </div>
++          <div className="rounded-2xl border border-cyan-300/20 bg-black/25 p-4">
++            <p className="text-xs uppercase text-slate-400">Ride Type</p>
++            <p className="mt-1 text-lg font-semibold capitalize text-cyan-200">{rideDetails.rideType}</p>
++          </div>
++          <div className="rounded-2xl border border-cyan-300/20 bg-black/25 p-4 sm:col-span-2">
++            <p className="text-xs uppercase text-slate-400">Route</p>
++            <p className="mt-1 flex items-center gap-2 text-slate-100"><FaMapMarkerAlt className="text-cyan-300" /> {rideDetails.pickup} → {rideDetails.destination}</p>
+           </div>
++          <div className="rounded-2xl border border-cyan-300/20 bg-black/25 p-4 sm:col-span-2">
++            <p className="text-xs uppercase text-slate-400">Departure</p>
++            <p className="mt-1 flex items-center gap-2 text-slate-100"><FaClock className="text-cyan-300" /> {rideDetails.departureTime}</p>
++          </div>
++        </div>
++
++        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
++          <button
++            onClick={() => router.push("/")}
++            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-violet-500 px-4 py-3 font-semibold text-[#050505] transition hover:brightness-110"
++          >
++            Back to Dashboard
++          </button>
++          <button
++            onClick={() => router.push("/request-ride")}
++            className="w-full rounded-xl border border-cyan-300/40 bg-white/[0.03] px-4 py-3 font-semibold text-cyan-200 transition hover:bg-cyan-500/10"
++          >
++            Book Another Ride
++          </button>
+         </div>
+       </div>
+     </div>
+   );
+-}
+\ No newline at end of file
++}
