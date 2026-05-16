@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 
-
 const rideSchema = new Schema({
   driver: String,
   car: String,
@@ -18,11 +17,5 @@ const rideSchema = new Schema({
   from: String,  // Pickup location
   to: String     // Destination
 });
-async function getRides() {
-    const client = new MongoClient(process.env.MONGODB_URI);
-    await client.connect();
-    return client.db().collection('rides');
-  }
-  
-  module.exports = { getRides };
+
 export default model('Ride', rideSchema);

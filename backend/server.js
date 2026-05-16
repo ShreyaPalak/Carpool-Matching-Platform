@@ -1,24 +1,27 @@
-// File: /pages/api/rides.js
-
-require('dotenv').config();
-import express, { json } from 'express';
-import { connect } from 'mongoose';
+import 'dotenv/config';
+import express from 'express';
 import cors from 'cors';
-import rideRoutes from './routes/rides';
+import rideRoutes from './routes/rides.js';
+import connectDB from './db.js';
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(json());
+app.use(express.json());
 
 // Routes
 app.use('/api/rides', rideRoutes);
 
 // MongoDB Connection
-connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+(async () => {
+	try {
+		await connectDB();
+		console.log('Connected to MongoDB');
+	} catch (err) {
+		console.error('MongoDB connection error:', err);
+	}
+})();
 
 // Start Server
 const PORT = process.env.PORT || 5000;
