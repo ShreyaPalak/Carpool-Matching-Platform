@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Ride from '../models/RIDE.js';
+import RideRequest from '../models/RideRequest.js';
 
 const router = Router();
 
@@ -29,6 +30,27 @@ router.post('/create', async (req, res) => {
   try {
     const newRide = await ride.save();
     res.status(201).json(newRide);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Submit a ride request (passenger booking)
+router.post('/request', async (req, res) => {
+  try {
+    const bookingId = `RF-${Math.floor(100000 + Math.random() * 900000)}`;
+    const rideRequest = new RideRequest({
+      ...req.body,
+      bookingId,
+      status: 'confirmed',
+    });
+
+    const savedRequest = await rideRequest.save();
+    res.status(201).json({
+      message: 'Ride request submitted successfully',
+      bookingId: savedRequest.bookingId,
+      request: savedRequest,
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
