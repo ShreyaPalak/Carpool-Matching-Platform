@@ -62,37 +62,22 @@ export default function RequestRidePage() {
     localStorage.setItem("rideDetails", JSON.stringify(rideDetails));
 
     try {
-      const formPayload = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        formPayload.append(key, String(value));
+      const response = await submitRideRequest(formData);
+      setSubmitState({
+        type: "success",
+        message: response.message || "Ride request submitted successfully.",
       });
 
-      const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyJ3vXMINq31qSn7FXECC_dkXx-H_zJWVitlFb8TKWx_JpidpC6npmqubypH_pBSswL/exec",
-        {
-          method: "POST",
-          body: formPayload,
-        }
+      localStorage.setItem(
+        "rideDetails",
+        JSON.stringify({ ...rideDetails, bookingId: response.bookingId || rideDetails.bookingId })
       );
-
-      if (!response.ok) {
-        setSubmitState({
-          type: "warning",
-          message:
-            "Request saved locally. Cloud sync is temporarily unavailable, but your booking is confirmed.",
-        });
-      } else {
-        setSubmitState({
-          type: "success",
-          message: "Ride request submitted successfully.",
-        });
-      }
     } catch (error) {
-      console.error("Submission fallback:", error);
+      console.error("Submission failed:", error);
       setSubmitState({
         type: "warning",
         message:
-          "Network issue detected. Request saved locally and confirmation will still be shown.",
+          "Request saved locally. The backend submission failed, but your booking is preserved locally.",
       });
     } finally {
       setIsSubmitting(false);
