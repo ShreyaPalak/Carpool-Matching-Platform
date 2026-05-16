@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FaCar, FaStar, FaUser, FaClock, FaMusic } from "react-icons/fa";
 import { Slider } from "@/components/ui/slider";
+import { searchRides } from "@/lib/api";
 
 const MapWithNoSSR = dynamic(() => import("../components/ui/MapComponent"), {
   ssr: false,
@@ -140,19 +141,42 @@ export default function CarpoolingUI() {
   const [detourTolerance, setDetourTolerance] = useState(5);
   const [seatAvailability, setSeatAvailability] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchResults, setSearchResults] = useState(dummyCars);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchMessage, setSearchMessage] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const filteredCars = useMemo(
-    () =>
-      dummyCars.filter(
-        (car) =>
-          car.seats >= seatAvailability &&
-          car.detour <= detourTolerance &&
-          (genderPreference === "" || car.gender === genderPreference) &&
-          (rideComfort === "" || car.comfort === rideComfort) &&
-          (!musicPreference || car.music)
-      ),
-    [seatAvailability, detourTolerance, genderPreference, rideComfort, musicPreference]
-  );
+  const handleSearch = async () => {
+    setIsSearching(true);
+    setSearchMessage("");
+    setHasSearched(true);
+
+    try {
+      const rides = await searchRides({
+        from: pickup,
+        to: destination,
+        seats: seatAvailability,
+        detourTolerance,
+        genderPreference,
+        rideComfort,
+        musicPreference,
+      });
+
+      setSearchResults(rides);
+
+      if (!rides.length) {
+        setSearchMessage("No rides were found for these search criteria.");
+      }
+    } catch (err) {
+      console.error("Ride search failed:", err);
+      setSearchMessage("Unable to load rides from the backend. Please try again later.");
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const displayedCars = searchResults;
 
   const activeFilters = [
     seatAvailability > 1 ? `${seatAvailability} seats` : null,
@@ -274,6 +298,18 @@ export default function CarpoolingUI() {
                 Reset filters
               </Button>
             </div>
+
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-slate-300">{hasSearched ? searchMessage || `${displayedCars.length} rides found` : "Search rides using the selected filters."}</p>
+              <Button
+                type="button"
+                onClick={handleSearch}
+                className="h-11 rounded-xl bg-cyan-500 px-6 text-sm font-semibold text-[#071022] hover:bg-cyan-400"
+                disabled={isSearching}
+              >
+                {isSearching ? "Searching..." : "Search rides"}
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -289,22 +325,22 @@ export default function CarpoolingUI() {
 
         <section className="overflow-hidden rounded-3xl border border-white/15 bg-[#121a2d]/70 shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)]">
           <div className="h-72 w-full sm:h-96">
-            <MapWithNoSSR center={[37.7749, -122.4194]} zoom={13} markers={filteredCars} />
+            <MapWithNoSSR center={[37.7749, -122.4194]} zoom={13} markers={displayedCars} />
           </div>
         </section>
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold sm:text-2xl">Available Rides ({filteredCars.length})</h2>
+            <h2 className="text-xl font-semibold sm:text-2xl">Available Rides ({displayedCars.length})</h2>
           </div>
 
-          {filteredCars.length === 0 ? (
+          {displayedCars.length === 0 ? (
             <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-10 text-center text-slate-300">
               No rides match your current filters. Try adjusting your preferences.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {filteredCars.map((car) => (
+              {displayedCars.map((car) => (
                 <Card key={car.id} className="group rounded-2xl border border-white/15 bg-white/7 text-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.18)] transition duration-220 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
                   <CardContent className="p-5">
                     <div className="flex flex-col gap-4 sm:flex-row">
